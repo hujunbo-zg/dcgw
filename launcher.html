@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>java我的世界启动器下载</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .download-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .download-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 300px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 5px solid;
+        }
+        
+        .download-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .exe-card {
+            border-top-color: #3498db;
+        }
+        
+        .apk-card {
+            border-top-color: #2ecc71;
+        }
+        
+        .file-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .exe-icon {
+            color: #3498db;
+        }
+        
+        .apk-icon {
+            color: #2ecc71;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .file-info {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .apk-btn {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .download-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .download-btn i {
+            margin-right: 10px;
+        }
+        
+        .progress-container {
+            height: 8px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #3498db;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .apk-progress {
+            background-color: #2ecc71;
+        }
+        
+        .instructions {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            text-align: left;
+            border-left: 5px solid #f39c12;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .file-note {
+            font-size: 0.9rem;
+            color: #95a5a6;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .download-section {
+                gap: 20px;
+            }
+            
+            .download-card {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .download-btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>java我的世界启动器下载</h1>
+        <p class="subtitle">点击下方按钮下载相应格式的文件到您的设备</p>
+        
+        <div class="download-section">
+            <!-- EXE文件下载卡片 -->
+            <div class="download-card exe-card">
+                <div class="file-icon exe-icon">
+                    <i class="fab fa-windows"></i>
+                </div>
+                <h2>Windows 应用程序</h2>
+                <p class="file-info">
+                    适用于Windows系统的可执行文件。请在Windows 7及以上版本运行。下载时可能会提醒有风险，请放心下载。
+                </p>
+                <button class="download-btn" id="exeDownloadBtn">
+                    <i class="fas fa-download"></i> 下载 EXE 文件
+                </button>
+                <div class="progress-container" id="exeProgressContainer">
+                    <div class="progress-bar" id="exeProgressBar"></div>
+                </div>
+                <p class="file-note">文件大小: ~15 MB | 版本: 2.1.0</p>
+            </div>
+            
+            <!-- APK文件下载卡片 -->
+            <div class="download-card apk-card">
+                <div class="file-icon apk-icon">
+                    <i class="fab fa-android"></i>
+                </div>
+                <h2>Android 应用程序</h2>
+                <p class="file-info">
+                    适用于Android系统的安装包文件。请在Android 5.0及以上版本安装。下载时可能会提醒有风险，请放心下载。
+                </p>
+                <button class="download-btn apk-btn" id="apkDownloadBtn">
+                    <i class="fas fa-download"></i> 下载 APK 文件
+                </button>
+                <div class="progress-container" id="apkProgressContainer">
+                    <div class="progress-bar apk-progress" id="apkProgressBar"></div>
+                </div>
+                <p class="file-note">文件大小: ~25 MB | 版本: 1.5.3</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>下载说明：</h3>
+            <ul>
+                <li>确保您的设备有足够的存储空间。</li>
+                <li>下载EXE文件后，双击运行安装程序。</li>
+                <li>下载APK文件后，您可能需要启用"未知来源"安装权限。</li>
+                <li>如果下载过程中出现问题，请刷新页面后重试。</li>
+                <li>如有安全警告，请确认您信任此来源。</li>
+            </ul>
+        </div>
+        
+        <p class="file-note" style="margin-top: 30px; text-align: center;">
+            注意：请根据您的设备类型选择合适的文件格式下载。
+        </p>
+    </div>
+
+    <script>
+        // 模拟文件下载进度
+        function simulateDownload(buttonId, progressBarId, progressContainerId, fileName) {
+            const downloadBtn = document.getElementById(buttonId);
+            const progressBar = document.getElementById(progressBarId);
+            const progressContainer = document.getElementById(progressContainerId);
+            
+            // 保存原始按钮文本
+            const originalText = downloadBtn.innerHTML;
+            
+            // 禁用按钮
+            downloadBtn.disabled = true;
+            downloadBtn.style.opacity = "0.7";
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 准备下载...';
+            
+            // 显示进度条
+            progressContainer.style.display = "block";
+            
+            // 模拟下载进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + "%";
+                
+                if (progress < 30) {
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在下载...';
+                } else if (progress < 70) {
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 下载中 ' + Math.round(progress) + '%';
+                } else if (progress < 100) {
+                    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 即将完成...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // 更新按钮状态
+                    downloadBtn.innerHTML = '<i class="fas fa-check"></i> 下载完成!';
+                    downloadBtn.style.background = "linear-gradient(to right, #2ecc71, #27ae60)";
+                    
+                    // 2秒后重置按钮
+                    setTimeout(() => {
+                        downloadBtn.disabled = false;
+                        downloadBtn.style.opacity = "1";
+                        downloadBtn.innerHTML = originalText;
+                        if (buttonId === "exeDownloadBtn") {
+                            downloadBtn.style.background = "linear-gradient(to right, #3498db, #2980b9)";
+                        } else {
+                            downloadBtn.style.background = "linear-gradient(to right, #2ecc71, #27ae60)";
+                        }
+                        progressContainer.style.display = "none";
+                        progressBar.style.width = "0%";
+                        
+                        // 在实际应用中，这里应该触发实际文件下载
+                        // window.location.href = fileName;
+                        
+                        // 显示下载完成消息
+                        alert(`文件 ${fileName} 下载完成！`);
+                    }, 2000);
+                }
+            }, 300);
+        }
+        
+        // 为EXE下载按钮添加事件
+        /*document.getElementById('exeDownloadBtn').addEventListener('click', function() {
+            simulateDownload('exeDownloadBtn', 'exeProgressBar', 'exeProgressContainer', 'application.exe');
+        });
+        
+        // 为APK下载按钮添加事件
+        document.getElementById('apkDownloadBtn').addEventListener('click', function() {
+            simulateDownload('apkDownloadBtn', 'apkProgressBar', 'apkProgressContainer', 'application.apk');
+        });
+        */
+        // 在实际部署时，使用以下代码直接下载文件（注释掉上面的模拟下载代码）：
+        document.getElementById('exeDownloadBtn').addEventListener('click', function() {
+            window.location.href = 'Plain Craft Launcher 2.exe';
+        });
+        
+        document.getElementById('apkDownloadBtn').addEventListener('click', function() {
+            window.location.href = 'fcl.apk';
+        });
+    </script>
+</body>
+</html>

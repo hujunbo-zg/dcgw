@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DC服务器玩家管理员名录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 整个页面平滑滚动，星空固定闪烁 */
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #000000;
+            font-family: 'Segoe UI', 'Poppins', 'Arial', 'Microsoft YaHei', 'SF Pro Text', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;    /* 整个屏幕可上下滑动 */
+            position: relative;
+            opacity: 0;
+            animation: pageFadeIn 1.2s ease-out forwards;
+        }
+
+        /* 页面整体淡入 */
+        @keyframes pageFadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* 星空canvas固定背景 (繁星闪烁+深邃黑色) */
+        #night-sky {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 轻柔氛围光晕 */
+        .atmosphere {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(circle at 30% 40%, rgba(10, 20, 45, 0.25) 0%, rgba(0, 0, 0, 0) 80%);
+        }
+
+        /* 可滚动内容容器 */
+        .scrollable-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2.2rem 1.5rem 4rem 1.5rem;
+        }
+
+        /* 主卡片面板 */
+        .main-panel {
+            width: 90%;
+            max-width: 700px;
+            margin: 0.8rem auto;
+            background: rgba(5, 8, 22, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            overflow: hidden;
+            animation: cardGlideUp 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+            opacity: 0;
+            transform: translateY(25px);
+        }
+
+        @keyframes cardGlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(35px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========= 秩序维护者区域 ========= */
+        .guardians-section {
+            padding: 1.5rem 1.8rem 1.2rem 1.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* 标题：无图标，小一点 */
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            background: linear-gradient(120deg, #f0ecff, #cbd9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.2rem;
+            text-align: left;
+            padding-left: 0.2rem;
+            border-left: 3px solid rgba(150, 180, 255, 0.7);
+            padding-left: 12px;
+        }
+
+        /* 垂直列表：每行一个人 */
+        .guardian-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            width: 100%;
+        }
+
+        .guardian-item {
+            background: rgba(25, 30, 55, 0.55);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid rgba(210, 200, 255, 0.25);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: slowPersonFade 0.6s ease-out forwards;
+        }
+
+        .guardian-name {
+            font-size: 1.05rem;
+            font-weight: 500;
+            background: linear-gradient(120deg, #fef7ef, #dee9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.3px;
+            display: block;
+        }
+
+        /* 人名渐显动画：从透明到完全显示，轻微上浮（更舒缓） */
+        @keyframes slowPersonFade {
+            0% {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========= 玩家名录区域 ========= */
+        .players-section {
+            padding: 0.8rem 1.8rem 1.8rem 1.8rem;
+        }
+
+        .players-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            background: linear-gradient(120deg, #f0ecff, #cbd9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0.8rem 0 1.2rem 0;
+            text-align: left;
+            padding-left: 0.2rem;
+            border-left: 3px solid rgba(150, 180, 255, 0.7);
+            padding-left: 12px;
+        }
+
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            width: 100%;
+        }
+
+        .player-item {
+            background: rgba(15, 20, 40, 0.65);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid rgba(200, 210, 255, 0.2);
+            opacity: 0;
+            transform: translateY(12px);
+            animation: slowPersonFade 0.6s ease-out forwards;
+        }
+
+        .player-name {
+            font-size: 1rem;
+            font-weight: 500;
+            background: linear-gradient(120deg, #fcf8f0, #d4e2ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.2px;
+            display: block;
+        }
+
+        /* 底部优雅留白 */
+        .star-footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(190, 200, 240, 0.55);
+            margin-top: 1.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed rgba(255,255,220,0.25);
+        }
+
+        /* 响应式 */
+        @media (max-width: 580px) {
+            .scrollable-content {
+                padding: 1.2rem 1rem 3rem;
+            }
+            .main-panel {
+                width: 96%;
+                border-radius: 36px;
+            }
+            .guardians-section, .players-section {
+                padding-left: 1.2rem;
+                padding-right: 1.2rem;
+            }
+            .section-title, .players-title {
+                font-size: 1.2rem;
+            }
+            .guardian-name, .player-name {
+                font-size: 0.9rem;
+            }
+            .guardian-item, .player-item {
+                padding: 0.55rem 1rem;
+            }
+        }
+
+        /* 滚动条 */
+        body::-webkit-scrollbar {
+            width: 5px;
+        }
+        body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+        }
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(145deg, #7f93dd, #546cb0);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 固定星空背景：深邃黑色 + 繁星闪烁 -->
+    <canvas id="night-sky"></canvas>
+    <div class="atmosphere"></div>
+
+    <!-- 可滑动主内容，人名渐显动画从上到下逐次出现（速度更慢） -->
+    <div class="scrollable-content">
+        <div class="main-panel">
+            <!-- 秩序维护者区块 -->
+            <div class="guardians-section">
+                <div class="section-title">秩序维护者</div>
+                <div class="guardian-list" id="guardianList"></div>
+            </div>
+
+            <!-- 玩家名录区块（独立标题，无图标） -->
+            <div class="players-section">
+                <div class="players-title">玩家名录</div>
+                <div class="player-list" id="playerList"></div>
+                <div class="star-footer">✦ 星河共鉴 · 名录长存 ✦</div>
+            </div>
+        </div>
+        <div style="height: 18px;"></div>
+    </div>
+
+    <script>
+        (function() {
+            // ================= 1. 深邃夜空背景：繁星闪烁 + 极细微尘，滑动时持续动态 =================
+            const canvas = document.getElementById('night-sky');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let stars = [];          // 星星数组
+            let stardust = [];       // 微尘点缀
+            
+            const STAR_CFG = {
+                starDensity: 0.92,
+                maxSize: 2.1,
+                minSize: 0.5,
+                twinkleSpeed: 0.0072,
+                dustFactor: 0.12,
+            };
+            
+            function randomRange(min, max) {
+                return min + Math.random() * (max - min);
+            }
+            
+            function initCosmicBackground() {
+                const area = (width * height) / 10000;
+                let starTotal = Math.floor(area * STAR_CFG.starDensity);
+                starTotal = Math.max(320, Math.min(starTotal, 5400));
+                stars = [];
+                for (let i = 0; i < starTotal; i++) {
+                    stars.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: randomRange(STAR_CFG.minSize, STAR_CFG.maxSize),
+                        twinklePhase: Math.random() * Math.PI * 2,
+                        baseBrightness: randomRange(0.45, 1.0),
+                        colorWarm: Math.random() > 0.7,
+                    });
+                }
+                
+                let dustCount = Math.floor(area * STAR_CFG.dustFactor);
+                dustCount = Math.min(650, Math.max(60, dustCount));
+                stardust = [];
+                for (let i = 0; i < dustCount; i++) {
+                    stardust.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: randomRange(0.3, 1.1),
+                        alpha: randomRange(0.07, 0.28),
+                        driftPhase: Math.random() * Math.PI * 2,
+                    });
+                }
+            }
+            
+            function drawStarrySky() {
+                if (!ctx) return;
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, width, height);
+                
+                // 极淡星尘
+                for (let d of stardust) {
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
+                    let breath = 0.6 + 0.4 * Math.sin(Date.now() * 0.0015 + d.driftPhase);
+                    let finalAlpha = d.alpha * breath * 0.4;
+                    ctx.fillStyle = `rgba(155, 175, 220, ${finalAlpha})`;
+                    ctx.fill();
+                }
+                
+                // 星星闪烁
+                const now = performance.now() * STAR_CFG.twinkleSpeed;
+                for (let star of stars) {
+                    const twinkle = 0.55 + 0.45 * Math.sin(now + star.twinklePhase);
+                    let brightFactor = star.baseBrightness * (0.65 + twinkle * 0.7);
+                    brightFactor = Math.min(1.0, Math.max(0.32, brightFactor));
+                    
+                    let r = 255, g = 245, b = 235;
+                    if (star.colorWarm) {
+                        r = 255;
+                        g = 240 + Math.floor(15 * brightFactor);
+                        b = 220 + Math.floor(20 * brightFactor);
+                    } else {
+                        r = 245 + Math.floor(10 * brightFactor);
+                        g = 240 + Math.floor(15 * brightFactor);
+                        b = 230 + Math.floor(20 * brightFactor);
+                    }
+                    const finalR = Math.min(255, Math.floor(r * brightFactor));
+                    const finalG = Math.min(255, Math.floor(g * brightFactor));
+                    const finalB = Math.min(255, Math.floor(b * brightFactor));
+                    
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgb(${finalR}, ${finalG}, ${finalB})`;
+                    ctx.fill();
+                    
+                    if (star.radius > 1.2 && brightFactor > 0.6) {
+                        ctx.beginPath();
+                        ctx.arc(star.x, star.y, star.radius * 1.6, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${finalR}, ${finalG}, ${finalB}, 0.1)`;
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            function animateStarryBackground() {
+                drawStarrySky();
+                requestAnimationFrame(animateStarryBackground);
+            }
+            
+            function handleResize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initCosmicBackground();
+                drawStarrySky();
+            }
+            
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            animateStarryBackground();
+            
+            // ================= 2. 数据: 秩序维护者 + 玩家名录 (每行一个人，极慢渐显 从上到下) =================
+            const guardiansData = [
+                "hujunboone", "xiaoxiaoliuliu", "people", "miaomiaomiao", "L_StoneOvO", "XL"
+            ];
+            
+            // 玩家名录 (人数众多，营造从上到下逐个渐显的缓慢优雅感)
+            const fullPlayersList = [
+                "wssbd", "Yahko", "yian", "sjka", "MOMO", "Yahkoqingwen3",
+                "waterisdead1", "like", "n3hiMf", "wp", "AET", "ZiJiel",
+                "xiaohaoLBK", "2006jwj", "AEV-yu-ACV", "ZiJieI", "sanxianjun", "tian",
+                "cgjzd", "xiaoyuan", "him", "Zi", "XiInSunLXzh12345", "Old",
+                "baiying114514", "TIANMO", "MC_XiaoLiuMC", "lidakai", "shuo", "StoutWord",
+                "Lin_Kui"
+            ];
+            
+            // 渲染秩序维护者（每行一人，慢速渐显，延迟明显拉长）
+            const guardianContainer = document.getElementById('guardianList');
+            if (guardianContainer) {
+                guardianContainer.innerHTML = '';
+                guardiansData.forEach((name, idx) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'guardian-item';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'guardian-name';
+                    nameSpan.textContent = name;
+                    itemDiv.appendChild(nameSpan);
+                    // 更慢的渐显：延迟大幅增加，节奏舒缓 (0.2s 起步，每个增加0.18s)
+                    const delay = 0.2 + idx * 0.18;
+                    itemDiv.style.animationDelay = `${delay}s`;
+                    guardianContainer.appendChild(itemDiv);
+                });
+            }
+            
+            // 渲染玩家名录（每行一个人，更加舒展的延迟，实现"从上到下渐渐显示"且速度更慢）
+            const playerContainer = document.getElementById('playerList');
+            if (playerContainer) {
+                playerContainer.innerHTML = '';
+                fullPlayersList.forEach((player, idx) => {
+                    const playerItem = document.createElement('div');
+                    playerItem.className = 'player-item';
+                    const playerSpan = document.createElement('span');
+                    playerSpan.className = 'player-name';
+                    playerSpan.textContent = player;
+                    playerItem.appendChild(playerSpan);
+                    // 秩序维护者最后一项的延迟大约：0.2 + 5*0.18 = 1.1s 左右，玩家名录从 1.2s 开始，每个递增0.1s → 整体从1.2s缓慢延续到名录末尾，非常舒缓
+                    // 保证名录逐行慢慢浮现，节奏优雅。
+                    const delayBase = 1.25 + idx * 0.1;
+                    playerItem.style.animationDelay = `${delayBase}s`;
+                    playerContainer.appendChild(playerItem);
+                });
+            }
+            
+            // 附加：完全符合要求 “慢一点” → 所有名字渐变入场速度明显放缓，动画持续时间0.6s+延迟阶梯更大，视觉上依次轻柔显现
+            // 整个页面仍然可以上下滑动，背景繁星闪烁，标题无图标且字号较小，每行一人。
+        })();
+    </script>
+</body>
+</html>
